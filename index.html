@@ -8,133 +8,142 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.5s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .bg-custom { background-size: cover; background-position: center; background-attachment: fixed; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .gradient-blue { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+        .gradient-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+        .gradient-orange { background: linear-gradient(135deg, #ea580c 0%, #fb923c 100%); }
     </style>
 </head>
-<body x-data="uksApp()" :class="bgImage ? 'bg-custom' : 'bg-slate-50'" :style="bgImage ? `background-image: linear-gradient(rgba(248,250,252,0.85), rgba(248,250,252,0.85)), url('${bgImage}')` : ''">
+<body x-data="uksApp()" :class="bgImage ? 'bg-custom' : 'bg-slate-50'" :style="bgImage ? `background-image: linear-gradient(rgba(241,245,249,0.9), rgba(241,245,249,0.9)), url('${bgImage}')` : ''">
 
     <template x-if="!loggedIn">
-        <div class="fixed inset-0 bg-white flex items-center justify-center z-[100] px-4">
-            <div class="w-full max-w-md text-center">
+        <div class="fixed inset-0 bg-slate-50 flex items-center justify-center z-[100] px-4">
+            <div class="w-full max-w-md p-10 bg-white rounded-[3rem] shadow-2xl shadow-blue-100 text-center">
                 <div class="w-20 h-20 bg-blue-600 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-white text-3xl shadow-xl">🏥</div>
-                <h1 class="text-4xl font-black text-gray-900 mb-2 tracking-tighter uppercase">SEHATI-UKS</h1>
-                <p class="text-gray-400 mb-10 tracking-[0.3em] uppercase text-[10px] font-bold">UPTD SMPN 1 KURAU</p>
-                <div class="space-y-4 text-left">
-                    <input type="text" x-model="adminName" placeholder="NAMA ADMIN" class="w-full px-6 py-5 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none font-bold text-sm uppercase">
-                    <button @click="if(adminName) loggedIn = true" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-200 mt-4 hover:scale-[1.02] transition-all uppercase tracking-widest">Masuk ke Aplikasi</button>
-                </div>
+                <h1 class="text-3xl font-black text-gray-900 mb-2 tracking-tighter uppercase">SEHATI-UKS</h1>
+                <p class="text-gray-400 mb-10 tracking-[0.2em] uppercase text-[9px] font-bold">UPTD SMPN 1 KURAU</p>
+                <input type="text" x-model="adminName" placeholder="NAMA PETUGAS" class="w-full px-6 py-5 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border-none font-bold text-sm uppercase mb-4">
+                <button @click="if(adminName) loggedIn = true" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-xs">Mulai Sesi</button>
             </div>
         </div>
     </template>
 
     <div x-show="loggedIn" class="flex min-h-screen">
-        <aside :class="sidebar ? 'w-72' : 'w-20'" class="bg-white/95 backdrop-blur-md border-r border-gray-100 flex flex-col transition-all duration-500 fixed h-full z-40 shadow-xl">
-            <div class="p-8 font-black text-xl text-blue-600 tracking-tighter">
-                <span x-show="sidebar">SEHATI-UKS</span><span x-show="!sidebar">S</span>
+        <aside :class="sidebar ? 'w-72' : 'w-24'" class="bg-white/90 backdrop-blur-xl border-r border-slate-100 flex flex-col transition-all duration-500 fixed h-full z-40">
+            <div class="p-8 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black">S</div>
+                    <span x-show="sidebar" class="font-black text-xl tracking-tighter text-slate-800">SEHATI</span>
+                </div>
             </div>
-            <nav class="flex-1 px-4 space-y-2">
-                <button @click="page = 'dashboard'" :class="page === 'dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50'" class="w-full flex items-center p-4 rounded-2xl transition-all">
-                    <span class="text-xl">📊</span> <span x-show="sidebar" class="ml-4 font-bold text-[10px] uppercase tracking-widest">Dashboard</span>
+            <nav class="flex-1 px-4 space-y-3">
+                <button @click="page = 'dashboard'" :class="page === 'dashboard' ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' : 'text-slate-400 hover:bg-slate-50'" class="w-full flex items-center p-4 rounded-2xl transition-all">
+                    <span class="text-xl">🏠</span> <span x-show="sidebar" class="ml-4 font-bold text-[10px] uppercase tracking-widest">Beranda</span>
                 </button>
-                <button @click="page = 'skrining'" :class="page === 'skrining' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50'" class="w-full flex items-center p-4 rounded-2xl transition-all">
-                    <span class="text-xl">📝</span> <span x-show="sidebar" class="ml-4 font-bold text-[10px] uppercase tracking-widest">Data Skrining</span>
+                <button @click="page = 'skrining'" :class="page === 'skrining' ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' : 'text-slate-400 hover:bg-slate-50'" class="w-full flex items-center p-4 rounded-2xl transition-all">
+                    <span class="text-xl">📋</span> <span x-show="sidebar" class="ml-4 font-bold text-[10px] uppercase tracking-widest">Data Skrining</span>
                 </button>
             </nav>
-            <div class="p-4" x-show="sidebar">
-                <label class="block w-full p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all text-center border-2 border-dashed border-gray-200">
-                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">🖼️ Foto Sekolah</span>
-                    <input type="file" class="hidden" @change="changeBg">
-                </label>
+            <div class="p-6" x-show="sidebar">
+                <div class="bg-slate-50 p-4 rounded-3xl border border-dashed border-slate-200">
+                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Custom Latar</p>
+                    <input type="file" class="hidden" id="bg-upload" @change="changeBg">
+                    <label for="bg-upload" class="block w-full py-2 bg-white text-blue-600 rounded-xl text-[9px] font-black text-center cursor-pointer shadow-sm">GANTI FOTO</label>
+                </div>
             </div>
         </aside>
 
-        <main :class="sidebar ? 'ml-72' : 'ml-20'" class="flex-1 transition-all duration-500">
-            <header class="h-20 glass-card px-8 flex items-center justify-between sticky top-0 z-30">
-                <button @click="sidebar = !sidebar" class="text-gray-400 p-2 hover:bg-white rounded-xl font-bold">☰</button>
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden md:block">
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Petugas UKS</p>
-                        <p class="text-sm font-bold text-gray-800 uppercase" x-text="adminName"></p>
+        <main :class="sidebar ? 'ml-72' : 'ml-24'" class="flex-1 transition-all">
+            <header class="h-24 px-10 flex items-center justify-between sticky top-0 z-30">
+                <h2 class="text-sm font-black text-slate-400 uppercase tracking-[0.3em]" x-text="page"></h2>
+                <div class="flex items-center gap-6 bg-white p-2 pr-6 rounded-2xl shadow-sm border border-slate-50">
+                    <div class="w-10 h-10 gradient-blue rounded-xl flex items-center justify-center text-white font-bold" x-text="adminName[0].toUpperCase()"></div>
+                    <div>
+                        <p class="text-[8px] font-black text-slate-300 uppercase leading-none">Petugas Aktif</p>
+                        <p class="text-xs font-bold text-slate-800 uppercase" x-text="adminName"></p>
                     </div>
-                    <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl shadow-lg border-2 border-white"></div>
                 </div>
             </header>
 
-            <div class="p-8">
-                <div x-show="page === 'dashboard'" x-transition class="space-y-6">
-                    <h2 class="text-3xl font-black text-gray-900 tracking-tighter uppercase">Panel Kontrol</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-blue-600 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
-                            <p class="opacity-70 text-xs font-black uppercase tracking-widest">Total Data Skrining</p>
-                            <h3 class="text-6xl font-black mt-2 tracking-tighter" x-text="skrinings.length"></h3>
+            <div class="p-10">
+                <div x-show="page === 'dashboard'" x-transition class="space-y-10">
+                    <div class="relative overflow-hidden gradient-blue rounded-[3.5rem] p-12 text-white shadow-2xl shadow-blue-200">
+                        <div class="relative z-10 max-w-xl">
+                            <h1 class="text-4xl font-black tracking-tighter mb-4">Halo, <span x-text="adminName"></span>! 👋</h1>
+                            <p class="text-blue-100 text-sm leading-relaxed opacity-90 font-medium">Selamat datang di sistem SEHATI-UKS SMPN 1 Kurau. Mari kita tingkatkan kesehatan siswa hari ini dengan pendataan yang akurat.</p>
+                            <div class="flex gap-4 mt-8">
+                                <button @click="page = 'skrining'; showModalSkrining = true" class="px-8 py-4 bg-white text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all">Input Data Baru</button>
+                                <button @click="downloadPDF()" class="px-8 py-4 bg-blue-500/30 backdrop-blur-md text-white border border-white/20 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-500/50 transition-all">Laporan PDF</button>
+                            </div>
                         </div>
-                        <div @click="page = 'skrining'; showModalSkrining = true" class="glass-card p-10 rounded-[3rem] flex flex-col items-center justify-center cursor-pointer hover:scale-[1.02] transition-all border-2 border-dashed border-blue-200 group">
-                            <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all">➕</div>
-                            <span class="font-black text-gray-800 text-[10px] uppercase tracking-widest text-center">Input Hasil Skrining Baru</span>
+                        <div class="absolute right-[-5%] top-[-20%] text-[20rem] font-black text-white/5 italic select-none">UKS</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="glass-card p-8 rounded-[3rem] shadow-sm">
+                            <div class="w-14 h-14 gradient-emerald rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg shadow-emerald-100 text-white">📈</div>
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Skrining</p>
+                            <h3 class="text-5xl font-black text-slate-800 tracking-tighter mt-1" x-text="skrinings.length"></h3>
                         </div>
-                        <div @click="downloadPDF()" class="bg-emerald-500 p-10 rounded-[3rem] text-white shadow-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-emerald-600 transition-all">
-                            <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-4">📄</div>
-                            <span class="font-black uppercase text-[10px] tracking-widest">Download Laporan Lengkap</span>
+                        <div class="glass-card p-8 rounded-[3rem] shadow-sm">
+                            <div class="w-14 h-14 gradient-orange rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg shadow-orange-100 text-white">🦷</div>
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Perlu Tindakan</p>
+                            <h3 class="text-5xl font-black text-slate-800 tracking-tighter mt-1" x-text="skrinings.filter(s => s.gigi !== 'Sehat').length"></h3>
+                        </div>
+                        <div class="glass-card p-8 rounded-[3rem] shadow-sm border-blue-100">
+                            <div class="w-14 h-14 gradient-blue rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-lg shadow-blue-100 text-white">🕒</div>
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Update Terakhir</p>
+                            <h3 class="text-xl font-black text-slate-800 mt-4 uppercase italic" x-text="skrinings.length > 0 ? skrinings[0].tanggal.split(' ')[0] : '-'"></h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[3rem] border border-slate-100 flex items-center gap-6">
+                        <div class="text-4xl">💡</div>
+                        <div>
+                            <p class="font-black text-slate-800 text-xs uppercase tracking-widest">Tips Hari Ini</p>
+                            <p class="text-slate-500 text-sm italic font-medium">"Pastikan alat ukur tinggi badan dan timbangan sudah dikalibrasi untuk hasil yang akurat!"</p>
                         </div>
                     </div>
                 </div>
 
                 <div x-show="page === 'skrining'" x-transition class="space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <button @click="page = 'dashboard'" class="px-6 py-3 bg-white rounded-2xl text-[10px] font-black text-gray-400 shadow-sm uppercase tracking-widest hover:bg-gray-100 transition-all">← Kembali</button>
-                        <button @click="showModalSkrining = true" class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl text-[10px] uppercase tracking-widest hover:scale-105 transition-all">+ Input Skrining</button>
+                    <div class="flex justify-between items-center">
+                        <button @click="page = 'dashboard'" class="px-6 py-3 bg-white rounded-2xl text-[10px] font-black text-slate-400 shadow-sm uppercase">← Kembali</button>
+                        <button @click="showModalSkrining = true" class="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl text-[10px] uppercase tracking-widest">+ Skrining Baru</button>
                     </div>
-
-                    <div class="glass-card rounded-[2.5rem] overflow-x-auto shadow-2xl border-none">
+                    <div class="glass-card rounded-[3rem] overflow-hidden shadow-xl border-none">
                         <table class="w-full text-left">
-                            <thead class="bg-gray-50/80 text-[9px] uppercase font-black text-gray-400 tracking-[0.2em]">
+                            <thead class="bg-slate-50/50 text-[9px] uppercase font-black text-slate-400 tracking-widest">
                                 <tr>
-                                    <th class="p-6">Tanggal / Petugas</th>
-                                    <th class="p-6">Nama / Kelas</th>
-                                    <th class="p-6">Fisik (BB/TB/Gizi)</th>
-                                    <th class="p-6">Medis (HB/Tensi)</th>
-                                    <th class="p-6">Organ (M/T/G)</th>
-                                    <th class="p-6 text-right">Aksi</th>
+                                    <th class="p-8">Identitas</th><th class="p-8">Hasil Fisik</th><th class="p-8">Organ</th><th class="p-8 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody class="divide-y divide-slate-100">
                                 <template x-for="(s, index) in skrinings" :key="index">
-                                    <tr class="hover:bg-white transition-all">
-                                        <td class="p-6">
-                                            <p class="text-[10px] font-black text-gray-800 uppercase" x-text="s.tanggal"></p>
-                                            <p class="text-[9px] font-bold text-blue-500 uppercase italic" x-text="'Oleh: ' + s.petugas"></p>
+                                    <tr class="hover:bg-white/50 transition-all">
+                                        <td class="p-8">
+                                            <p class="font-black text-slate-800 text-sm uppercase tracking-tighter" x-text="s.nama"></p>
+                                            <p class="text-[10px] text-blue-600 font-bold uppercase" x-text="s.kelas"></p>
                                         </td>
-                                        <td class="p-6">
-                                            <p class="font-black text-gray-800 text-sm uppercase tracking-tighter" x-text="s.nama"></p>
-                                            <p class="text-[10px] text-gray-400 font-bold uppercase" x-text="s.kelas"></p>
-                                        </td>
-                                        <td class="p-6">
-                                            <div class="text-[10px] font-bold space-y-1">
-                                                <p><span class="text-gray-400">BB:</span> <span x-text="s.bb + ' Kg'"></span></p>
-                                                <p><span class="text-gray-400">TB:</span> <span x-text="s.tb + ' Cm'"></span></p>
-                                                <p><span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-[9px]" x-text="s.gizi"></span></p>
+                                        <td class="p-8">
+                                            <div class="text-[10px] font-bold">
+                                                <span class="text-slate-400">BB:</span> <span x-text="s.bb"></span> | 
+                                                <span class="text-slate-400">TB:</span> <span x-text="s.tb"></span>
+                                                <p class="text-blue-500 italic mt-1" x-text="s.gizi"></p>
                                             </div>
                                         </td>
-                                        <td class="p-6">
-                                            <div class="text-[10px] font-bold space-y-1">
-                                                <p><span class="text-gray-400">HB:</span> <span x-text="s.hb + ' g/dL'"></span></p>
-                                                <p><span class="text-gray-400">TD:</span> <span x-text="s.td + ' mmHg'"></span></p>
+                                        <td class="p-8">
+                                            <div class="flex gap-2">
+                                                <span class="px-2 py-1 bg-slate-100 rounded-lg text-[9px] font-black text-slate-600" x-text="'👁️ '+s.mata"></span>
+                                                <span class="px-2 py-1 bg-slate-100 rounded-lg text-[9px] font-black text-slate-600" x-text="'🦷 '+s.gigi"></span>
                                             </div>
                                         </td>
-                                        <td class="p-6">
-                                            <div class="flex gap-1">
-                                                <span class="px-2 py-1 bg-gray-100 rounded text-[9px] font-black" :class="s.mata === 'Normal' ? 'text-emerald-600' : 'text-red-500'" x-text="'👁️ '+s.mata"></span>
-                                                <span class="px-2 py-1 bg-gray-100 rounded text-[9px] font-black" :class="s.telinga === 'Normal' ? 'text-emerald-600' : 'text-red-500'" x-text="'👂 '+s.telinga"></span>
-                                                <span class="px-2 py-1 bg-gray-100 rounded text-[9px] font-black" :class="s.gigi === 'Sehat' ? 'text-emerald-600' : 'text-red-500'" x-text="'🦷 '+s.gigi"></span>
-                                            </div>
-                                        </td>
-                                        <td class="p-6 text-right">
-                                            <button @click="hapusData(index)" class="w-9 h-9 bg-red-50 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all text-xs">🗑️</button>
+                                        <td class="p-8 text-right">
+                                            <button @click="hapusData(index)" class="text-red-300 hover:text-red-500 transition-all">🗑️</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -146,69 +155,23 @@
         </main>
     </div>
 
-    <div x-show="showModalSkrining" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4" x-transition>
-        <div class="bg-white w-full max-w-4xl rounded-[3.5rem] p-12 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-start mb-10">
-                <div>
-                    <h3 class="text-3xl font-black text-gray-900 tracking-tighter uppercase">Formulir Skrining Kesehatan</h3>
-                    <p class="text-blue-600 font-bold text-xs uppercase tracking-widest mt-1">Lengkapi data kesehatan siswa di bawah ini</p>
-                </div>
-                <button @click="showModalSkrining = false" class="text-gray-300 hover:text-red-500 text-3xl">×</button>
+    <div x-show="showModalSkrining" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4" x-transition>
+        <div class="bg-white w-full max-w-3xl rounded-[3.5rem] p-12 shadow-2xl">
+            <h3 class="text-3xl font-black text-gray-900 mb-8 tracking-tighter uppercase">Input Skrining</h3>
+            <div class="grid grid-cols-2 gap-6">
+                <input type="text" x-model="newData.nama" placeholder="NAMA LENGKAP" class="col-span-2 w-full p-5 bg-slate-50 rounded-2xl outline-none font-black text-sm border-none">
+                <select x-model="newData.kelas" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-black text-sm">
+                    <option>VII-A</option><option>VII-B</option><option>VIII-A</option><option>VIII-B</option><option>IX-A</option><option>IX-B</option>
+                </select>
+                <input type="number" x-model="newData.bb" placeholder="BB (Kg)" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-black">
+                <input type="number" x-model="newData.tb" placeholder="TB (Cm)" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-black">
+                <select x-model="newData.gigi" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-black text-sm">
+                    <option>Sehat</option><option>Karies</option><option>Berlubang</option>
+                </select>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Identitas Siswa</label>
-                    <input type="text" x-model="newData.nama" placeholder="NAMA LENGKAP SISWA" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black uppercase text-sm focus:ring-2 focus:ring-blue-500 border-none">
-                    <select x-model="newData.kelas" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black text-sm border-none focus:ring-2 focus:ring-blue-500">
-                        <option>VII-A</option><option>VII-B</option><option>VIII-A</option><option>VIII-B</option><option>IX-A</option><option>IX-B</option>
-                    </select>
-                    
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mt-4 block">Fisik & Gizi</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" x-model="newData.bb" placeholder="BB (Kg)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black">
-                        <input type="number" x-model="newData.tb" placeholder="TB (Cm)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black">
-                    </div>
-                    <select x-model="newData.gizi" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black text-sm border-none">
-                        <option>Gizi Baik (Normal)</option><option>Kurang Gizi</option><option>Obesitas</option><option>Stunting</option>
-                    </select>
-                </div>
-
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block">Skrining Medis</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" x-model="newData.hb" placeholder="HB (g/dL)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black">
-                        <input type="text" x-model="newData.td" placeholder="Tensi (mmHg)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black">
-                    </div>
-                    
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mt-4 block">Kesehatan Organ</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="space-y-1">
-                            <span class="text-[9px] font-black text-gray-300 uppercase ml-1">Mata</span>
-                            <select x-model="newData.mata" class="w-full p-3 bg-gray-50 rounded-xl outline-none font-black text-[10px] border-none">
-                                <option>Normal</option><option>Rabun</option><option>Silinder</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <span class="text-[9px] font-black text-gray-300 uppercase ml-1">Telinga</span>
-                            <select x-model="newData.telinga" class="w-full p-3 bg-gray-50 rounded-xl outline-none font-black text-[10px] border-none">
-                                <option>Normal</option><option>Serumen</option><option>Infeksi</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <span class="text-[9px] font-black text-gray-300 uppercase ml-1">Gigi</span>
-                            <select x-model="newData.gigi" class="w-full p-3 bg-gray-50 rounded-xl outline-none font-black text-[10px] border-none">
-                                <option>Sehat</option><option>Karies</option><option>Berlubang</option>
-                            </select>
-                        </div>
-                    </div>
-                    <textarea x-model="newData.catatan" placeholder="CATATAN TAMBAHAN (OPSIONAL)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none h-24 font-bold text-xs border-none"></textarea>
-                </div>
-            </div>
-
-            <div class="flex gap-4 pt-10">
-                <button @click="showModalSkrining = false" class="flex-1 py-5 font-black text-gray-300 uppercase text-[10px] tracking-widest hover:text-gray-500 transition-all">Batalkan</button>
-                <button @click="simpanSkrining()" class="flex-[2] py-5 bg-blue-600 text-white rounded-3xl font-black shadow-2xl uppercase text-[10px] tracking-widest hover:scale-[1.03] transition-all">Simpan Hasil Skrining</button>
+            <div class="flex gap-4 mt-10">
+                <button @click="showModalSkrining = false" class="flex-1 py-5 font-black text-slate-300 uppercase text-[10px]">Batal</button>
+                <button @click="simpanSkrining()" class="flex-[2] py-5 bg-blue-600 text-white rounded-3xl font-black shadow-xl uppercase text-[10px] tracking-widest">Simpan Data</button>
             </div>
         </div>
     </div>
@@ -216,18 +179,11 @@
     <script>
         function uksApp() {
             return {
-                loggedIn: false, 
-                page: 'dashboard', 
-                sidebar: true, 
-                adminName: '',
+                loggedIn: false, page: 'dashboard', sidebar: true, adminName: '',
                 bgImage: localStorage.getItem('uksBg') || '',
                 showModalSkrining: false,
                 skrinings: JSON.parse(localStorage.getItem('uksSkrining')) || [],
-                
-                newData: { 
-                    nama: '', kelas: 'VII-A', bb: '', tb: '', gizi: 'Gizi Baik (Normal)', 
-                    hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat', catatan: '' 
-                },
+                newData: { nama: '', kelas: 'VII-A', bb: '', tb: '', gizi: 'Normal', hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat' },
 
                 changeBg(e) {
                     const reader = new FileReader();
@@ -237,59 +193,24 @@
                     };
                     reader.readAsDataURL(e.target.files[0]);
                 },
-
                 simpanSkrining() {
-                    if(!this.newData.nama) return alert('Nama Siswa wajib diisi!');
-                    
-                    const now = new Date();
-                    const tglString = now.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) + ' ' + now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-                    
-                    this.skrinings.unshift({
-                        ...this.newData,
-                        tanggal: tglString,
-                        petugas: this.adminName
-                    });
-                    
+                    if(!this.newData.nama) return alert('Isi Nama!');
+                    const tgl = new Date().toLocaleDateString('id-ID');
+                    this.skrinings.unshift({...this.newData, tanggal: tgl, petugas: this.adminName});
                     localStorage.setItem('uksSkrining', JSON.stringify(this.skrinings));
                     this.showModalSkrining = false;
-                    this.resetForm();
+                    this.newData = { nama: '', kelas: 'VII-A', bb: '', tb: '', gizi: 'Normal', hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat' };
                 },
-
-                resetForm() {
-                    this.newData = { 
-                        nama: '', kelas: 'VII-A', bb: '', tb: '', gizi: 'Gizi Baik (Normal)', 
-                        hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat', catatan: '' 
-                    };
-                },
-
                 hapusData(index) {
-                    if(confirm('Hapus data skrining ini?')) {
-                        this.skrinings.splice(index, 1);
-                        localStorage.setItem('uksSkrining', JSON.stringify(this.skrinings));
-                    }
+                    if(confirm('Hapus?')) { this.skrinings.splice(index, 1); localStorage.setItem('uksSkrining', JSON.stringify(this.skrinings)); }
                 },
-
                 downloadPDF() {
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF('landscape');
-                    doc.setFontSize(18);
-                    doc.text("LAPORAN SKRINING KESEHATAN SISWA - SMPN 1 KURAU", 14, 15);
-                    doc.setFontSize(9);
-                    doc.text(`Tgl Cetak: ${new Date().toLocaleString('id-ID')} | Petugas: ${this.adminName}`, 14, 22);
-                    
-                    const head = [['Tgl/Waktu', 'Nama Siswa', 'Kls', 'BB', 'TB', 'Gizi', 'HB', 'TD', 'Mata', 'Telinga', 'Gigi', 'Petugas']];
-                    const body = this.skrinings.map(s => [
-                        s.tanggal, s.nama, s.kelas, s.bb, s.tb, s.gizi, s.hb, s.td, s.mata, s.telinga, s.gigi, s.petugas
-                    ]);
-
-                    doc.autoTable({
-                        head: head,
-                        body: body,
-                        startY: 30,
-                        styles: { fontSize: 8 },
-                        headStyles: { fillColor: [37, 99, 235] }
-                    });
-                    doc.save(`Laporan_Skrining_UKS_${this.adminName}.pdf`);
+                    const doc = new jsPDF();
+                    doc.text("LAPORAN UKS SMPN 1 KURAU", 14, 20);
+                    const body = this.skrinings.map(s => [s.tanggal, s.nama, s.kelas, s.bb, s.tb, s.gizi]);
+                    doc.autoTable({ head: [['Tgl', 'Nama', 'Kls', 'BB', 'TB', 'Gizi']], body: body, startY: 30 });
+                    doc.save("Laporan_UKS.pdf");
                 }
             }
         }
