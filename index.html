@@ -10,249 +10,243 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfdfe; color: #1e293b; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; }
         .glass-card { background: white; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.03); border-radius: 2rem; }
-        .btn-gradient { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; transition: all 0.3s; }
-        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(15,23,42,0.3); }
-        .sidebar-item { transition: all 0.3s; border-radius: 1rem; }
-        .sidebar-item.active { background: #f1f5f9; color: #2563eb; }
+        .btn-primary { background: #2563eb; color: white; transition: all 0.3s; shadow: 0 4px 12px rgba(37,99,235,0.2); }
+        .btn-primary:hover { transform: translateY(-1px); background: #1d4ed8; }
+        .sidebar-item { transition: all 0.3s; border-radius: 1rem; color: #94a3b8; font-weight: 700; }
+        .sidebar-item.active { background: #eff6ff; color: #2563eb; }
         [x-cloak] { display: none !important; }
     </style>
 </head>
 <body x-data="uksApp()" x-cloak>
 
-    <aside class="fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-100 p-8 z-50 hidden lg:flex flex-col">
-        <div class="flex items-center gap-3 mb-12">
-            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-100">🏥</div>
-            <div>
-                <h1 class="font-extrabold text-xl tracking-tighter">UKS DIGITAL</h1>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">SMPN 1 KURAU</p>
+    <template x-if="!loggedIn">
+        <div class="fixed inset-0 bg-slate-50 flex items-center justify-center z-[100] px-4">
+            <div class="w-full max-w-md p-10 bg-white rounded-[3rem] shadow-2xl text-center border border-slate-100">
+                <div class="w-20 h-20 bg-blue-600 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-white text-3xl shadow-xl">🏥</div>
+                <h1 class="text-3xl font-black text-slate-900 mb-2 tracking-tighter uppercase">SEHATI-UKS</h1>
+                <p class="text-slate-400 mb-10 text-[10px] font-bold uppercase tracking-widest">SMPN 1 KURAU - LOGIN PETUGAS</p>
+                
+                <div class="space-y-4 text-left">
+                    <input type="text" x-model="loginData.user" placeholder="Nama Petugas" class="w-full px-6 py-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500 font-bold">
+                    <input type="password" x-model="loginData.pass" placeholder="Password" class="w-full px-6 py-4 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-blue-500 font-bold">
+                    <button @click="handleLogin()" class="w-full btn-primary py-5 rounded-2xl font-black uppercase tracking-widest text-xs mt-2 shadow-lg">Masuk Sistem</button>
+                </div>
             </div>
         </div>
+    </template>
 
-        <nav class="space-y-2 flex-1">
-            <template x-for="menu in menus">
-                <button @click="page = menu.id" 
-                        :class="page === menu.id ? 'active' : 'text-slate-400 hover:bg-slate-50'"
-                        class="w-full sidebar-item flex items-center p-4 font-bold text-sm">
-                    <span class="mr-3 text-xl" x-text="menu.icon"></span>
-                    <span x-text="menu.label"></span>
-                </button>
-            </template>
-        </nav>
-
-        <div class="p-6 bg-slate-50 rounded-[2rem]">
-            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Admin Aktif</p>
-            <p class="text-sm font-extrabold text-slate-800" x-text="adminEmail || 'Petugas UKS'"></p>
-        </div>
-    </aside>
-
-    <main class="lg:ml-72 p-6 lg:p-12 pb-24">
-        
-        <header class="flex justify-between items-center mb-12">
-            <div>
-                <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 uppercase" x-text="menus.find(m => m.id === page).label"></h2>
-                <p class="text-slate-400 text-sm font-medium">Sistem Informasi Kesehatan Terpadu</p>
-            </div>
-            <button @click="printLaporan()" class="px-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2">
-                <span>📄</span> Export PDF
-            </button>
-        </header>
-
-        <div x-show="page === 'dashboard'" class="space-y-8" x-transition>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-card p-8">
-                    <p class="text-slate-400 text-[10px] font-extrabold uppercase tracking-widest">Kunjungan Hari Ini</p>
-                    <h3 class="text-5xl font-black mt-2 text-blue-600" x-text="visits.filter(v => v.tanggal === today).length"></h3>
-                    <p class="text-[10px] mt-4 font-bold text-slate-400">Paling banyak keluhan: <span class="text-slate-800">Pusing</span></p>
-                </div>
-                <div class="glass-card p-8">
-                    <p class="text-slate-400 text-[10px] font-extrabold uppercase tracking-widest">Siswa Sering Sakit</p>
-                    <div class="mt-4 space-y-2">
-                        <template x-for="top in getTopSiswa()">
-                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
-                                <span class="text-[10px] font-bold uppercase" x-text="top.nama"></span>
-                                <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full" x-text="top.count + 'x'"></span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-                <div class="glass-card p-8 flex flex-col justify-center bg-slate-900 text-white border-none">
-                    <p class="text-slate-400 text-[10px] font-extrabold uppercase tracking-widest">Aksi Cepat</p>
-                    <button @click="page = 'kunjungan'" class="mt-4 w-full py-4 bg-blue-600 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20">Input Kunjungan Baru</button>
-                </div>
+    <div x-show="loggedIn" class="flex min-h-screen">
+        <aside class="hidden lg:flex w-72 bg-white border-r border-slate-100 flex-col p-8 fixed h-full z-40">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-100">S</div>
+                <span class="font-extrabold text-xl tracking-tighter uppercase text-slate-800">Sehati</span>
             </div>
 
-            <div class="glass-card p-8">
-                <h4 class="font-extrabold text-sm uppercase tracking-widest mb-6">Tren Kunjungan Mingguan</h4>
-                <div class="flex items-end gap-3 h-32">
-                    <template x-for="h in [2,5,8,3,10,4,1]">
-                        <div class="flex-1 bg-blue-100 rounded-t-xl transition-all hover:bg-blue-600" :style="'height:' + (h*10) + '%'"></div>
+            <nav class="flex-1 space-y-2">
+                <template x-for="menu in menus">
+                    <button @click="page = menu.id" :class="page === menu.id ? 'active' : ''" class="w-full sidebar-item flex items-center p-4 text-sm">
+                        <span class="mr-3 text-lg" x-text="menu.icon"></span> <span x-text="menu.label"></span>
+                    </button>
+                </template>
+            </nav>
+
+            <div class="p-6 bg-slate-50 rounded-3xl">
+                <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Petugas Jaga</p>
+                <p class="text-xs font-bold text-slate-800 uppercase" x-text="loginData.user"></p>
+                <button @click="loggedIn = false" class="mt-4 text-[10px] font-black text-red-400 uppercase hover:text-red-600">Logout</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 lg:ml-72 p-6 lg:p-12">
+            
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter uppercase" x-text="menus.find(m => m.id === page).label"></h2>
+                    <p class="text-slate-400 font-medium">Layanan UKS SMPN 1 KURAU</p>
+                </div>
+                <div class="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+                    <template x-for="kls in listKelas">
+                        <button @click="pilihKelas = kls" 
+                                :class="pilihKelas === kls ? 'bg-blue-600 text-white' : 'text-slate-400'"
+                                class="px-4 py-2 rounded-xl font-bold text-[10px] uppercase transition-all" x-text="kls"></button>
                     </template>
+                    <button @click="tambahKelas()" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-[10px]">+</button>
                 </div>
-                <div class="flex justify-between mt-4 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                    <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
-                </div>
-            </div>
-        </div>
+            </header>
 
-        <div x-show="page === 'siswa'" class="space-y-6" x-transition>
-            <div class="flex gap-4">
-                <input type="text" x-model="searchSiswa" placeholder="Cari Nama atau Kelas..." class="flex-1 p-4 glass-card outline-none font-bold text-sm">
-            </div>
-            <div class="glass-card overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-[10px] font-extrabold text-slate-400 uppercase">
-                        <tr><th class="p-6">Siswa</th><th class="p-6">Riwayat Sakit</th><th class="p-6">Kontak Ortu</th></tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        <template x-for="s in filteredSiswa()">
-                            <tr class="hover:bg-slate-50 transition-all cursor-pointer" @click="showDetail(s)">
-                                <td class="p-6">
-                                    <p class="font-extrabold text-sm uppercase" x-text="s.nama"></p>
-                                    <p class="text-[10px] font-bold text-blue-600" x-text="s.kelas"></p>
-                                </td>
-                                <td class="p-6 text-xs text-slate-500" x-text="s.riwayat || 'Tidak ada catatan'"></td>
-                                <td class="p-6 text-xs font-bold" x-text="s.ortu"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div x-show="page === 'kunjungan'" class="max-w-2xl mx-auto" x-transition>
-            <div class="glass-card p-10 space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Nama Siswa</label>
-                        <select x-model="formKunjungan.nama" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none mt-1">
-                            <option value="">-- Pilih Siswa --</option>
-                            <template x-for="s in listSiswa">
-                                <option :value="s.nama" x-text="s.nama + ' (' + s.kelas + ')'"></option>
-                            </template>
-                        </select>
+            <div x-show="page === 'dashboard'" x-transition class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-8">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Siswa Terdata (<span x-text="pilihKelas"></span>)</p>
+                        <h3 class="text-5xl font-black text-slate-800 mt-2" x-text="visits.filter(v => v.kelas === pilihKelas).length"></h3>
                     </div>
-                    <div class="col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Keluhan</label>
-                        <textarea x-model="formKunjungan.keluhan" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none mt-1" rows="3"></textarea>
+                    <div class="glass-card p-8">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Rata-rata HB Siswa</p>
+                        <h3 class="text-5xl font-black text-emerald-500 mt-2">13.2</h3>
                     </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Tindakan</label>
-                        <select x-model="formKunjungan.tindakan" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none mt-1">
-                            <option>Istirahat di UKS</option><option>Diberi Obat</option><option>Rujuk Puskesmas</option><option>Kembali ke Kelas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Obat & Dosis</label>
-                        <input type="text" x-model="formKunjungan.obat" placeholder="Contoh: Paracetamol 500mg" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none mt-1">
+                    <div class="glass-card p-8 bg-blue-600 text-white border-none">
+                        <p class="text-blue-100 text-[10px] font-black uppercase tracking-widest">Kunjungan Hari Ini</p>
+                        <h3 class="text-5xl font-black mt-2" x-text="visits.filter(v => v.tanggal === today).length"></h3>
                     </div>
                 </div>
-                <button @click="simpanKunjungan()" class="w-full py-5 btn-gradient rounded-2xl font-extrabold uppercase text-xs tracking-[0.2em]">Simpan Kunjungan</button>
-            </div>
-        </div>
 
-        <div x-show="page === 'absensi'" class="space-y-6" x-transition>
-            <div class="bg-amber-50 border border-amber-100 p-6 rounded-3xl flex items-center gap-4">
-                <span class="text-2xl">🔔</span>
-                <p class="text-xs font-bold text-amber-800 uppercase italic">Notifikasi: 3 Siswa sudah absen sakit lebih dari 3 hari bulan ini!</p>
-            </div>
-            <div class="glass-card p-8">
-                <h4 class="font-extrabold text-sm uppercase mb-6">Input Absen Sakit (Guru)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" x-model="formAbsen.nama" placeholder="Nama Siswa" class="p-4 bg-slate-50 rounded-xl font-bold border-none">
-                    <input type="text" x-model="formAbsen.alasan" placeholder="Alasan Sakit" class="p-4 bg-slate-50 rounded-xl font-bold border-none">
-                    <button @click="simpanAbsen()" class="bg-slate-900 text-white rounded-xl font-bold uppercase text-[10px]">Simpan Absen</button>
+                <div class="glass-card overflow-hidden">
+                    <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                        <h4 class="font-black text-xs uppercase tracking-widest">Data Kesehatan Kelas <span x-text="pilihKelas"></span></h4>
+                        <button @click="exportPDF()" class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Cetak Laporan PDF</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase">
+                                <tr>
+                                    <th class="p-6">Siswa</th>
+                                    <th class="p-6">Fisik (BB/TB)</th>
+                                    <th class="p-6">Medis (HB/TD)</th>
+                                    <th class="p-6">Organ</th>
+                                    <th class="p-6">Keluhan/Obat</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <template x-for="v in visits.filter(x => x.kelas === pilihKelas)">
+                                    <tr class="hover:bg-slate-50 transition-all text-xs font-bold">
+                                        <td class="p-6">
+                                            <p class="text-slate-900 uppercase" x-text="v.nama"></p>
+                                            <p class="text-[9px] text-slate-400" x-text="v.tanggal"></p>
+                                        </td>
+                                        <td class="p-6">
+                                            <span x-text="v.bb + 'kg / ' + v.tb + 'cm'"></span>
+                                            <p class="text-blue-500 text-[9px] uppercase" x-text="v.gizi"></p>
+                                        </td>
+                                        <td class="p-6">
+                                            <p x-text="'HB: ' + v.hb"></p>
+                                            <p x-text="'TD: ' + v.td"></p>
+                                        </td>
+                                        <td class="p-6">
+                                            <div class="flex gap-1">
+                                                <span class="bg-slate-100 px-2 py-1 rounded text-[9px]" :title="v.mata">👁️</span>
+                                                <span class="bg-slate-100 px-2 py-1 rounded text-[9px]" :title="v.gigi">🦷</span>
+                                                <span class="bg-slate-100 px-2 py-1 rounded text-[9px]" :title="v.telinga">👂</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-6">
+                                            <p class="text-red-500 uppercase text-[10px]" x-text="v.keluhan"></p>
+                                            <p class="text-slate-400 text-[10px]" x-text="'Obat: ' + v.obat"></p>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </main>
+            <div x-show="page === 'kunjungan'" x-transition class="max-w-4xl mx-auto">
+                <div class="glass-card p-10 space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h4 class="font-black text-xs uppercase text-blue-600 mb-4 border-b pb-2 italic tracking-widest">Identitas & Fisik</h4>
+                            <input type="text" x-model="form.nama" placeholder="NAMA LENGKAP SISWA" class="w-full p-4 bg-slate-50 rounded-2xl font-bold uppercase text-xs border-none outline-none">
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="number" x-model="form.bb" placeholder="BB (KG)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none">
+                                <input type="number" x-model="form.tb" placeholder="TB (CM)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none">
+                            </div>
+                            <select x-model="form.gizi" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-xs border-none outline-none">
+                                <option>Gizi: Baik (Normal)</option><option>Gizi: Kurang</option><option>Gizi: Lebih (Obesitas)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-black text-xs uppercase text-red-600 mb-4 border-b pb-2 italic tracking-widest">Skrining Medis</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="text" x-model="form.hb" placeholder="HB (RS/PUSKESMAS)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none">
+                                <input type="text" x-model="form.td" placeholder="TD (TENSI)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none">
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <select x-model="form.mata" class="p-3 bg-slate-50 rounded-xl font-bold text-[9px] border-none outline-none uppercase"><option>Normal</option><option>Rabun</option></select>
+                                <select x-model="form.telinga" class="p-3 bg-slate-50 rounded-xl font-bold text-[9px] border-none outline-none uppercase"><option>Normal</option><option>Serumen</option></select>
+                                <select x-model="form.gigi" class="p-3 bg-slate-50 rounded-xl font-bold text-[9px] border-none outline-none uppercase"><option>Sehat</option><option>Karies</option></select>
+                            </div>
+                            <textarea x-model="form.keluhan" placeholder="KELUHAN / DIAGNOSA" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-xs border-none outline-none uppercase" rows="2"></textarea>
+                            <input type="text" x-model="form.obat" placeholder="OBAT & DOSIS" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-xs border-none outline-none">
+                        </div>
+                    </div>
+                    <button @click="simpanData()" class="w-full py-5 btn-primary rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Simpan Seluruh Data</button>
+                </div>
+            </div>
 
-    <nav class="lg:hidden fixed bottom-0 w-full bg-white border-t p-4 flex justify-around z-50 shadow-2xl">
-        <template x-for="menu in menus">
-            <button @click="page = menu.id" :class="page === menu.id ? 'text-blue-600' : 'text-slate-300'" class="text-2xl" x-text="menu.icon"></button>
-        </template>
-    </nav>
+            <div x-show="page === 'absensi'" x-transition class="space-y-6">
+                <div class="glass-card p-8">
+                    <h4 class="font-black text-xs uppercase mb-6 tracking-widest">Input Absen Sakit</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" x-model="formAbsen.nama" placeholder="Nama Siswa" class="p-4 bg-slate-50 rounded-xl font-bold border-none uppercase">
+                        <input type="text" x-model="formAbsen.alasan" placeholder="Alasan (Misal: Demam)" class="p-4 bg-slate-50 rounded-xl font-bold border-none uppercase">
+                        <button @click="simpanAbsen()" class="bg-slate-900 text-white rounded-xl font-bold uppercase text-[10px]">Simpan Absen</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
     <script>
         function uksApp() {
             return {
-                page: 'dashboard',
+                loggedIn: false, page: 'dashboard', pilihKelas: 'VII-A',
                 today: new Date().toLocaleDateString('id-ID'),
-                adminEmail: localStorage.getItem('uksAdmin') || 'Admin UKS',
-                searchSiswa: '',
+                loginData: { user: '', pass: '' },
                 menus: [
-                    { id: 'dashboard', label: 'Dashboard Utama', icon: '🏠' },
-                    { id: 'siswa', label: 'Profil Siswa', icon: '👩‍🎓' },
-                    { id: 'kunjungan', label: 'Form Kunjungan', icon: '📝' },
+                    { id: 'dashboard', label: 'Ringkasan Sehati', icon: '📊' },
+                    { id: 'kunjungan', label: 'Input Medis & Kunjungan', icon: '📝' },
                     { id: 'absensi', label: 'Absensi Sakit', icon: '📆' }
                 ],
-                listSiswa: JSON.parse(localStorage.getItem('uksSiswa')) || [
-                    { nama: 'BUDI SANTOSO', kelas: 'VII-A', ortu: '0812-3456-7890', riwayat: 'Pusing, Demam' },
-                    { nama: 'SITI AMINAH', kelas: 'VIII-B', ortu: '0812-9999-0000', riwayat: 'Maag' }
-                ],
+                listKelas: JSON.parse(localStorage.getItem('uksKls')) || ['VII-A', 'VII-B', 'VIII-A', 'VIII-B', 'IX-A', 'IX-B'],
                 visits: JSON.parse(localStorage.getItem('uksVisits')) || [],
                 absensi: JSON.parse(localStorage.getItem('uksAbsen')) || [],
-                formKunjungan: { nama: '', keluhan: '', tindakan: 'Istirahat di UKS', obat: '' },
+                form: { nama: '', bb: '', tb: '', gizi: 'Gizi: Baik (Normal)', hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat', keluhan: '', obat: '' },
                 formAbsen: { nama: '', alasan: '' },
 
-                filteredSiswa() {
-                    return this.listSiswa.filter(s => s.nama.toLowerCase().includes(this.searchSiswa.toLowerCase()) || s.kelas.toLowerCase().includes(this.searchSiswa.toLowerCase()));
+                handleLogin() {
+                    // Password Sederhana: admin123 (Silakan ganti jika perlu)
+                    if(this.loginData.user && this.loginData.pass === 'admin123') {
+                        this.loggedIn = true;
+                    } else { alert("Nama Petugas atau Password (admin123) salah!"); }
                 },
 
-                getTopSiswa() {
-                    const counts = {};
-                    this.visits.forEach(v => counts[v.nama] = (counts[v.nama] || 0) + 1);
-                    return Object.entries(counts)
-                        .map(([nama, count]) => ({ nama, count }))
-                        .sort((a,b) => b.count - a.count)
-                        .slice(0, 3);
+                tambahKelas() {
+                    let k = prompt("Nama Kelas Baru:");
+                    if(k) { this.listKelas.push(k.toUpperCase()); localStorage.setItem('uksKls', JSON.stringify(this.listKelas)); }
                 },
 
-                simpanKunjungan() {
-                    if(!this.formKunjungan.nama) return alert("Pilih Nama Siswa!");
-                    const data = { ...this.formKunjungan, tanggal: this.today };
-                    this.visits.unshift(data);
+                simpanData() {
+                    if(!this.form.nama) return alert("Nama Siswa Wajib Diisi!");
+                    this.visits.unshift({ ...this.form, kelas: this.pilihKelas, tanggal: this.today });
                     localStorage.setItem('uksVisits', JSON.stringify(this.visits));
-                    
-                    // Update riwayat di profil siswa
-                    const idx = this.listSiswa.findIndex(s => s.nama === this.formKunjungan.nama);
-                    if(idx !== -1) {
-                        this.listSiswa[idx].riwayat = this.formKunjungan.keluhan;
-                        localStorage.setItem('uksSiswa', JSON.stringify(this.listSiswa));
-                    }
-
-                    alert("Data Kunjungan Berhasil Disimpan!");
-                    this.formKunjungan = { nama: '', keluhan: '', tindakan: 'Istirahat di UKS', obat: '' };
+                    alert("Data Berhasil Disimpan!");
+                    this.form = { nama: '', bb: '', tb: '', gizi: 'Gizi: Baik (Normal)', hb: '', td: '', mata: 'Normal', telinga: 'Normal', gigi: 'Sehat', keluhan: '', obat: '' };
                     this.page = 'dashboard';
                 },
 
                 simpanAbsen() {
-                    if(!this.formAbsen.nama) return alert("Isi Nama Siswa!");
-                    const isKeUks = this.visits.some(v => v.nama.toUpperCase() === this.formAbsen.nama.toUpperCase() && v.tanggal === this.today);
-                    this.absensi.unshift({ ...this.formAbsen, tanggal: this.today, cekUks: isKeUks });
+                    if(!this.formAbsen.nama) return alert("Isi Nama!");
+                    this.absensi.unshift({ ...this.formAbsen, tanggal: this.today });
                     localStorage.setItem('uksAbsen', JSON.stringify(this.absensi));
-                    alert(isKeUks ? "Absen Disimpan. Siswa ini terdeteksi ke UKS hari ini." : "Absen Disimpan.");
+                    alert("Absen Berhasil Disimpan!");
                     this.formAbsen = { nama: '', alasan: '' };
                 },
 
-                printLaporan() {
+                exportPDF() {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
-                    doc.setFontSize(18);
-                    doc.text("LAPORAN BULANAN UKS - SMPN 1 KURAU", 14, 20);
-                    doc.setFontSize(10);
-                    doc.text("Dicetak pada: " + this.today, 14, 28);
-                    
-                    const rows = this.visits.map(v => [v.tanggal, v.nama, v.keluhan, v.tindakan, v.obat]);
+                    doc.setFontSize(14);
+                    doc.text(`LAPORAN KESEHATAN KELAS ${this.pilihKelas} - SMPN 1 KURAU`, 14, 20);
+                    const rows = this.visits.filter(x => x.kelas === this.pilihKelas).map(v => [v.nama, `${v.bb}/${v.tb}`, v.hb, v.td, v.keluhan]);
                     doc.autoTable({
-                        head: [['Tanggal', 'Nama Siswa', 'Keluhan', 'Tindakan', 'Obat']],
+                        head: [['Nama', 'BB/TB', 'HB', 'Tensi', 'Keluhan']],
                         body: rows,
-                        startY: 35,
-                        theme: 'grid'
+                        startY: 30
                     });
-                    doc.save("Laporan_UKS_Bulanan.pdf");
+                    doc.save(`Laporan_UKS_${this.pilihKelas}.pdf`);
                 }
             }
         }
