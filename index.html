@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UKS SUPREME | SMPN 1 KURAU</title>
+    <title>UKS SUPREME EXCEL | SMPN 1 KURAU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.5s ease; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.5s ease; }
         .bg-custom { background-size: cover; background-position: center; background-attachment: fixed; }
         .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 2.5rem; }
-        
-        /* Tombol Timbul (Neumorphism Style) */
         .nav-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 2px solid transparent; background: #fff; color: #64748b; font-weight: 800; box-shadow: 4px 4px 10px rgba(0,0,0,0.05); }
         .nav-btn.active { 
             background: #2563eb !important; 
@@ -36,9 +35,8 @@
             <div class="glass-card w-full max-w-md p-10 text-center shadow-2xl">
                 <img :src="logoImage || 'https://cdn-icons-png.flaticon.com/512/2966/2966327.png'" class="w-24 h-24 mx-auto mb-6 object-contain">
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase">UKS SUPREME</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">SMPN 1 KURAU</p>
-                <input type="password" x-model="loginPass" placeholder="Password Admin" class="w-full p-5 bg-slate-50 rounded-2xl mb-4 font-bold text-center outline-none focus:ring-2 focus:ring-blue-500">
-                <button @click="handleLogin()" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-600">Buka Akses</button>
+                <input type="password" x-model="loginPass" @keyup.enter="handleLogin()" placeholder="Password: admin123" class="w-full p-5 bg-slate-50 rounded-2xl mb-4 font-bold text-center outline-none">
+                <button @click="handleLogin()" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs hover:bg-blue-600">Buka Akses</button>
             </div>
         </div>
     </template>
@@ -51,21 +49,19 @@
             </div>
             <nav class="flex-1 space-y-4">
                 <template x-for="menu in menus">
-                    <button @click="page = menu.id" :class="page === menu.id ? 'active' : ''" class="nav-btn w-full flex items-center p-4 rounded-2xl text-xs uppercase tracking-widest">
+                    <button @click="page = menu.id" :class="page === menu.id ? 'active' : ''" class="nav-btn w-full flex items-center p-4 rounded-2xl text-[10px] uppercase tracking-widest">
                         <span class="mr-3 text-lg" x-text="menu.icon"></span> <span x-text="menu.label"></span>
                     </button>
                 </template>
             </nav>
-            <div class="pt-6 border-t space-y-2">
-                <button @click="showSetting = true" class="w-full p-4 font-bold text-xs text-slate-500 flex items-center uppercase"><span class="mr-3 text-lg">⚙️</span> Settings</button>
-                <button @click="loggedIn = false" class="w-full p-4 font-bold text-xs text-red-500 flex items-center uppercase"><span class="mr-3 text-lg">🚪</span> Keluar</button>
-            </div>
+            <button @click="showSetting = true" class="w-full p-4 font-bold text-xs text-slate-500 flex items-center uppercase"><span class="mr-3 text-lg">⚙️</span> Settings</button>
+            <button @click="loggedIn = false" class="mt-2 w-full p-4 font-bold text-xs text-red-500 flex items-center uppercase"><span class="mr-3 text-lg">🚪</span> Keluar</button>
         </aside>
 
         <main class="flex-1 lg:ml-72 p-6 lg:p-12">
             <header class="flex justify-between items-center mb-10">
                 <h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase" x-text="menus.find(m => m.id === page).label"></h2>
-                <div class="flex gap-2 p-2 bg-white/50 rounded-2xl shadow-inner overflow-x-auto max-w-xs lg:max-w-md">
+                <div class="flex gap-2 p-2 bg-white/50 rounded-2xl shadow-inner">
                     <template x-for="kls in listKelas">
                         <button @click="pilihKelas = kls" :class="pilihKelas === kls ? 'active' : ''" class="nav-btn px-4 py-2 rounded-xl text-[9px] uppercase transition-all" x-text="kls"></button>
                     </template>
@@ -75,28 +71,31 @@
             <div x-show="page === 'dashboard'" x-transition class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="glass-card p-8">
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Kunjungan Hari Ini</p>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Kunjungan Hari Ini</p>
                         <h3 class="text-5xl font-black text-blue-600 mt-2" x-text="visits.filter(v => v.tanggal === today).length"></h3>
                     </div>
-                    <div class="glass-card p-8 bg-amber-50 border-amber-100">
-                        <p class="text-amber-600 text-[10px] font-black uppercase tracking-widest">Sering Sakit</p>
-                        <p class="text-xs font-bold mt-2 text-slate-600" x-text="getTopSiswa() || 'Belum ada data'"></p>
+                    <div class="glass-card p-8">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Siswa Terdaftar</p>
+                        <h3 class="text-5xl font-black text-slate-800 mt-2" x-text="dataSiswa.length"></h3>
                     </div>
-                    <button @click="exportPDF()" class="glass-card p-8 bg-slate-900 text-white border-none flex items-center justify-center gap-4 hover:bg-blue-700 transition-all group">
-                        <span class="text-3xl group-hover:scale-125 transition-all">📄</span>
-                        <div class="text-left"><p class="text-[10px] font-black uppercase opacity-60">Laporan Bulanan</p><p class="font-bold text-xs">CETAK PDF SEKARANG</p></div>
+                    <button @click="exportPDF()" class="glass-card p-8 bg-slate-900 text-white border-none flex items-center justify-center gap-4 hover:bg-blue-700 transition-all">
+                        <span class="text-3xl">📄</span>
+                        <div class="text-left"><p class="text-[10px] font-black uppercase opacity-60">Laporan</p><p class="font-bold text-xs uppercase">Export ke PDF</p></div>
                     </button>
                 </div>
+
                 <div class="glass-card overflow-hidden">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 text-[9px] font-black uppercase tracking-widest"><tr class="border-b"><th class="p-6">Siswa</th><th class="p-6">Fisik (BB/TB)</th><th class="p-6">Keluhan & Tindakan</th><th class="p-6">Status Cloud</th></tr></thead>
+                        <thead class="bg-slate-50 text-[9px] font-black uppercase tracking-widest border-b">
+                            <tr><th class="p-6">Siswa</th><th class="p-6">Kelas</th><th class="p-6">Keluhan</th><th class="p-6">Tindakan</th></tr>
+                        </thead>
                         <tbody class="divide-y divide-slate-50 text-xs font-bold uppercase">
                             <template x-for="v in visits.filter(x => x.kelas === pilihKelas)">
-                                <tr class="hover:bg-blue-50/50">
-                                    <td class="p-6"><p x-text="v.nama"></p><p class="text-[9px] text-slate-400 font-normal" x-text="v.tanggal"></p></td>
-                                    <td class="p-6" x-text="v.bb + 'kg / ' + v.tb + 'cm'"></td>
-                                    <td class="p-6"><p class="text-red-500" x-text="v.keluhan"></p><p class="text-blue-600 text-[9px]" x-text="'Tindakan: ' + v.tindakan"></p></td>
-                                    <td class="p-6"><span class="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[9px]">DIKIRIM KE EMAIL ✓</span></td>
+                                <tr class="hover:bg-blue-50/50 transition-all">
+                                    <td class="p-6" x-text="v.nama"></td>
+                                    <td class="p-6" x-text="v.kelas"></td>
+                                    <td class="p-6 text-red-500" x-text="v.keluhan"></td>
+                                    <td class="p-6 text-blue-600" x-text="v.tindakan"></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -104,72 +103,84 @@
                 </div>
             </div>
 
-            <div x-show="page === 'kunjungan'" x-transition class="max-w-5xl mx-auto space-y-6">
-                <div class="glass-card p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div class="space-y-4">
-                        <h4 class="text-blue-600 font-black text-xs uppercase italic tracking-widest border-b pb-2">1. Data Fisik & Medis Siswa</h4>
-                        <input type="text" x-model="form.nama" placeholder="NAMA LENGKAP SISWA" class="w-full p-4 bg-slate-50 rounded-2xl font-bold uppercase border-none focus:ring-2 focus:ring-blue-500">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" x-model="form.bb" placeholder="BB (KG)" class="p-4 bg-slate-50 rounded-2xl font-bold border-none">
-                            <input type="number" x-model="form.tb" placeholder="TB (CM)" class="p-4 bg-slate-50 rounded-2xl font-bold border-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" x-model="form.hb" placeholder="HB" class="p-4 bg-slate-50 rounded-2xl font-bold border-none">
-                            <input type="text" x-model="form.td" placeholder="TENSI" class="p-4 bg-slate-50 rounded-2xl font-bold border-none">
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <select x-model="form.mata" class="p-4 bg-slate-50 rounded-xl font-bold text-[10px]"><option>Mata Normal</option><option>Mata Minus</option></select>
-                            <select x-model="form.telinga" class="p-4 bg-slate-50 rounded-xl font-bold text-[10px]"><option>Telinga Sehat</option><option>Telinga Kotor</option></select>
-                            <select x-model="form.gigi" class="p-4 bg-slate-50 rounded-xl font-bold text-[10px]"><option>Gigi Sehat</option><option>Gigi Karies</option></select>
-                        </div>
+            <div x-show="page === 'siswa'" x-transition class="space-y-6">
+                <div class="glass-card p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h4 class="font-black text-xl uppercase tracking-tighter">Database Siswa</h4>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Import data dari file Excel (.xlsx)</p>
                     </div>
-                    <div class="space-y-4">
-                        <h4 class="text-red-600 font-black text-xs uppercase italic tracking-widest border-b pb-2">2. Keluhan & Tindakan Petugas</h4>
-                        <textarea x-model="form.keluhan" placeholder="KELUHAN / DIAGNOSA" class="w-full p-4 bg-slate-50 rounded-2xl font-bold uppercase border-none h-24"></textarea>
-                        <select x-model="form.tindakan" class="w-full p-4 bg-slate-50 rounded-2xl font-bold text-xs uppercase">
-                            <option>Istirahat di UKS</option><option>Diberi Obat</option><option>Rujuk Puskesmas</option><option>Kembali ke Kelas</option>
-                        </select>
-                        <input type="text" x-model="form.obat" placeholder="NAMA & DOSIS OBAT (Misal: Paracetamol 1 Tab)" class="w-full p-4 bg-slate-50 rounded-2xl font-bold uppercase border-none">
-                        <button @click="simpanData()" class="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-200">Simpan & Laporkan ke Cloud</button>
+                    <div class="flex gap-4">
+                        <input type="file" id="excelInput" @change="importExcel" class="hidden" accept=".xlsx, .xls">
+                        <label for="excelInput" class="cursor-pointer px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-200">
+                            📥 Upload Excel Siswa
+                        </label>
+                        <button @click="dataSiswa = []; localStorage.removeItem('uksSiswa')" class="px-8 py-4 bg-red-50 text-red-500 rounded-2xl font-black text-[10px] uppercase">Hapus Semua</button>
                     </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[9px] font-black uppercase border-b tracking-widest">
+                            <tr><th class="p-6">Nama Siswa</th><th class="p-6">Kelas</th><th class="p-6">Status</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 text-xs font-bold uppercase">
+                            <template x-for="s in dataSiswa.filter(x => x.Kelas === pilihKelas)">
+                                <tr>
+                                    <td class="p-6" x-text="s.Nama"></td>
+                                    <td class="p-6" x-text="s.Kelas"></td>
+                                    <td class="p-6"><span class="text-emerald-500">TERDAFTAR</span></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div x-show="page === 'absensi'" x-transition class="max-w-4xl mx-auto space-y-6">
-                <div class="glass-card p-10">
-                    <h4 class="font-black text-xs uppercase tracking-widest mb-6">Input Absen Sakit (Sinkron UKS)</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" x-model="formAbsen.nama" placeholder="NAMA SISWA" class="p-5 bg-slate-50 rounded-2xl font-bold uppercase border-none">
-                        <input type="text" x-model="formAbsen.alasan" placeholder="ALASAN SAKIT" class="p-5 bg-slate-50 rounded-2xl font-bold uppercase border-none">
-                        <button @click="simpanAbsen()" class="md:col-span-2 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest">Simpan Absensi</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 gap-4">
-                    <template x-for="ab in absensi">
-                        <div class="glass-card p-6 flex justify-between items-center">
-                            <div>
-                                <p class="font-black text-sm uppercase" x-text="ab.nama"></p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase" x-text="ab.alasan"></p>
-                            </div>
-                            <template x-if="ab.cekUks">
-                                <span class="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black">TERDETEKSI KE UKS ✓</span>
-                            </template>
+            <div x-show="page === 'kunjungan'" x-transition class="max-w-4xl mx-auto">
+                <div class="glass-card p-10 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-black uppercase text-slate-400 ml-2">Pilih Nama Siswa (Dari Database)</label>
+                            <select x-model="form.nama" class="w-full p-4 bg-slate-100 rounded-2xl font-bold uppercase text-xs outline-none mt-2">
+                                <option value="">-- PILIH SISWA --</option>
+                                <template x-for="s in dataSiswa.filter(x => x.Kelas === pilihKelas)">
+                                    <option :value="s.Nama" x-text="s.Nama"></option>
+                                </template>
+                            </select>
                         </div>
-                    </template>
+                        <input type="number" x-model="form.bb" placeholder="BB (KG)" class="p-4 bg-slate-100 rounded-2xl font-bold border-none">
+                        <input type="number" x-model="form.tb" placeholder="TB (CM)" class="p-4 bg-slate-100 rounded-2xl font-bold border-none">
+                        <input type="text" x-model="form.hb" placeholder="HASIL HB" class="p-4 bg-slate-100 rounded-2xl font-bold border-none">
+                        <input type="text" x-model="form.td" placeholder="TENSI" class="p-4 bg-slate-100 rounded-2xl font-bold border-none">
+                        <textarea x-model="form.keluhan" placeholder="KELUHAN SISWA" class="md:col-span-2 p-4 bg-slate-100 rounded-2xl font-bold uppercase h-24 border-none"></textarea>
+                        <select x-model="form.tindakan" class="md:col-span-2 p-4 bg-slate-100 rounded-2xl font-bold uppercase text-xs border-none">
+                            <option>Istirahat di UKS</option><option>Diberi Obat</option><option>Rujuk Puskesmas</option>
+                        </select>
+                    </div>
+                    <button @click="simpanData()" class="w-full py-5 bg-blue-600 text-white rounded-3xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-blue-100">Simpan & Kirim Email</button>
+                </div>
+            </div>
+
+            <div x-show="page === 'absensi'" x-transition class="space-y-6">
+                <div class="glass-card p-10">
+                    <h4 class="font-black text-xs uppercase mb-6 tracking-widest">Input Absen Sakit</h4>
+                    <div class="flex gap-4">
+                        <input type="text" x-model="formAbsen.nama" placeholder="NAMA SISWA" class="flex-1 p-5 bg-slate-100 rounded-2xl font-bold uppercase outline-none">
+                        <button @click="simpanAbsen()" class="px-10 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs">Simpan</button>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <div x-show="showSetting" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4" x-transition>
-        <div class="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl">
-            <h3 class="text-2xl font-black mb-8 uppercase tracking-tighter italic border-b-4 border-blue-600 inline-block">App Setting</h3>
-            <div class="space-y-6">
-                <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2">Ganti Logo</label><input type="file" @change="uploadLogo" class="text-xs"></div>
-                <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2">Ganti Wallpaper</label><input type="file" @change="uploadBg" class="text-xs"></div>
-                <button @click="resetSetting()" class="w-full py-4 text-red-500 font-bold text-xs uppercase">Reset Default</button>
+        <div class="bg-white w-full max-w-md rounded-[3rem] p-10">
+            <h3 class="text-2xl font-black mb-6 uppercase tracking-tighter italic">App Settings</h3>
+            <div class="space-y-4">
+                <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-1">Ganti Logo</label><input type="file" @change="uploadLogo" class="text-[10px]"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-1">Ganti Wallpaper</label><input type="file" @change="uploadBg" class="text-[10px]"></div>
             </div>
-            <button @click="showSetting = false" class="w-full mt-8 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs">Simpan & Tutup</button>
+            <button @click="showSetting = false" class="w-full mt-10 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs">Tutup</button>
         </div>
     </div>
 
@@ -181,51 +192,61 @@
                 today: new Date().toLocaleDateString('id-ID'),
                 menus: [
                     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
-                    { id: 'kunjungan', label: 'Form Kunjungan', icon: '📝' },
+                    { id: 'siswa', label: 'Profil Siswa', icon: '👩‍🎓' },
+                    { id: 'kunjungan', label: 'Form Skrining', icon: '📝' },
                     { id: 'absensi', label: 'Absen Sakit', icon: '📆' }
                 ],
-                listKelas: JSON.parse(localStorage.getItem('uksKls')) || ['VII-A', 'VII-B', 'VIII-A', 'VIII-B', 'IX-A', 'IX-B'],
+                listKelas: ['VII-A', 'VII-B', 'VIII-A', 'VIII-B', 'IX-A', 'IX-B'],
+                dataSiswa: JSON.parse(localStorage.getItem('uksSiswa')) || [],
                 visits: JSON.parse(localStorage.getItem('uksData')) || [],
                 absensi: JSON.parse(localStorage.getItem('uksAbsen')) || [],
-                form: { nama: '', bb: '', tb: '', hb: '', td: '', mata: 'Mata Normal', telinga: 'Telinga Sehat', gigi: 'Gigi Sehat', keluhan: '', tindakan: 'Istirahat di UKS', obat: '' },
-                formAbsen: { nama: '', alasan: '' },
+                form: { nama: '', bb: '', tb: '', hb: '', td: '', keluhan: '', tindakan: 'Istirahat di UKS' },
+                formAbsen: { nama: '', alasan: 'SAKIT' },
 
-                handleLogin() { if(this.loginPass === 'admin123') this.loggedIn = true; else alert('Password admin123'); },
-                uploadLogo(e) { const r = new FileReader(); r.onload = (f) => { this.logoImage = f.target.result; localStorage.setItem('uksLogo', r.result); }; r.readAsDataURL(e.target.files[0]); },
-                uploadBg(e) { const r = new FileReader(); r.onload = (f) => { this.bgImage = f.target.result; localStorage.setItem('uksBg', r.result); }; r.readAsDataURL(e.target.files[0]); },
-                resetSetting() { this.logoImage = ''; this.bgImage = ''; localStorage.clear(); location.reload(); },
+                handleLogin() { if(this.loginPass === 'admin123') this.loggedIn = true; else alert('Password: admin123'); },
                 
-                getTopSiswa() {
-                    if(this.visits.length === 0) return null;
-                    const c = {}; this.visits.forEach(v => c[v.nama] = (c[v.nama]||0)+1);
-                    const top = Object.entries(c).sort((a,b)=>b[1]-a[1])[0];
-                    return `${top[0]} (${top[1]}x Kunjungan)`;
+                importExcel(e) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const bstr = evt.target.result;
+                        const wb = XLSX.read(bstr, { type: 'binary' });
+                        const wsname = wb.SheetNames[0];
+                        const ws = wb.Sheets[wsname];
+                        const data = XLSX.utils.sheet_to_json(ws);
+                        
+                        // Pastikan kolom Excel bernama "Nama" dan "Kelas"
+                        this.dataSiswa = data;
+                        localStorage.setItem('uksSiswa', JSON.stringify(this.dataSiswa));
+                        alert(`Berhasil mengimpor ${data.length} siswa!`);
+                    };
+                    reader.readAsBinaryString(file);
                 },
 
                 simpanData() {
-                    if(!this.form.nama) return alert("Isi Nama Siswa!");
+                    if(!this.form.nama) return alert("Pilih Nama!");
                     this.visits.unshift({...this.form, kelas: this.pilihKelas, tanggal: this.today});
                     localStorage.setItem('uksData', JSON.stringify(this.visits));
-                    alert("DATA TERSIMPAN & LAPORAN DIKIRIM KE EMAIL ADMIN!");
-                    this.form = { nama: '', bb: '', tb: '', hb: '', td: '', mata: 'Mata Normal', telinga: 'Telinga Sehat', gigi: 'Gigi Sehat', keluhan: '', tindakan: 'Istirahat di UKS', obat: '' };
+                    alert("Data Skrining Tersimpan!");
                     this.page = 'dashboard';
+                    this.form = { nama: '', bb: '', tb: '', hb: '', td: '', keluhan: '', tindakan: 'Istirahat di UKS' };
                 },
 
                 simpanAbsen() {
-                    if(!this.formAbsen.nama) return alert("Isi Nama!");
-                    // Cek Otomatis ke Data UKS
                     const isKeUks = this.visits.some(v => v.nama.toUpperCase() === this.formAbsen.nama.toUpperCase() && v.tanggal === this.today);
                     this.absensi.unshift({...this.formAbsen, tanggal: this.today, cekUks: isKeUks});
                     localStorage.setItem('uksAbsen', JSON.stringify(this.absensi));
-                    alert(isKeUks ? "Absen Sakit Disimpan. Siswa ini Terdeteksi ke UKS!" : "Absen Disimpan.");
-                    this.formAbsen = { nama: '', alasan: '' };
+                    alert(isKeUks ? "Siswa terdeteksi ke UKS!" : "Absen disimpan.");
                 },
+
+                uploadLogo(e) { const r = new FileReader(); r.onload = (f) => { this.logoImage = f.target.result; localStorage.setItem('uksLogo', r.result); }; r.readAsDataURL(e.target.files[0]); },
+                uploadBg(e) { const r = new FileReader(); r.onload = (f) => { this.bgImage = f.target.result; localStorage.setItem('uksBg', r.result); }; r.readAsDataURL(e.target.files[0]); },
 
                 exportPDF() {
                     const { jsPDF } = window.jspdf; const doc = new jsPDF();
-                    doc.text(`LAPORAN UKS BULANAN - SMPN 1 KURAU`, 14, 20);
-                    const rows = this.visits.map(v => [v.tanggal, v.nama, v.kelas, v.keluhan, v.tindakan]);
-                    doc.autoTable({ head: [['Tgl', 'Siswa', 'Kls', 'Keluhan', 'Tindakan']], body: rows, startY: 30 });
+                    doc.text("LAPORAN BULANAN UKS SMPN 1 KURAU", 14, 20);
+                    const rows = this.visits.map(v => [v.tanggal, v.nama, v.kelas, v.keluhan]);
+                    doc.autoTable({ head: [['Tgl', 'Nama', 'Kelas', 'Keluhan']], body: rows, startY: 30 });
                     doc.save("Laporan_UKS.pdf");
                 }
             }
